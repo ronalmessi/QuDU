@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cn.iclass.webapp.qudu.bottomsheet.BottomSheetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottomSheetLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <include layout="@layout/toolbar" />
+
+            <WebView
+                android:id="@+id/webView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </WebView>
+
+        </LinearLayout>
+
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/avi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:maxHeight="76dp"
+            android:maxWidth="76dp"
+            android:minHeight="76dp"
+            android:minWidth="76dp"
+            android:visibility="invisible"/>
+
+    </FrameLayout>
+
+
+</cn.iclass.webapp.qudu.bottomsheet.BottomSheetLayout>
+

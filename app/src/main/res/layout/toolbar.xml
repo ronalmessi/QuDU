@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="52dp"
+    android:background="?attr/colorPrimary"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/toolbar_left"
+        android:layout_gravity="left"
+        android:background="@mipmap/ic_back"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:layout_marginLeft="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+    <TextView
+        android:id="@+id/toolbar_index"
+        android:layout_gravity="left"
+        android:text="首页"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:layout_marginLeft="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/toolbar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:textStyle="bold"
+        android:text="首页"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/toolbar_right"
+        android:layout_gravity="right"
+        android:layout_marginRight="10dp"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</android.support.v7.widget.Toolbar>

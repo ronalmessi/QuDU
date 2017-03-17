@@ -1,0 +1,53 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+    defaultConfig {
+        applicationId "cn.iclass.webapp.qudu"
+        minSdkVersion 16
+        targetSdkVersion 21
+        versionCode 9
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+
+    signingConfigs {
+        releaseNBLink {
+            storeFile file("../keystore")
+            storePassword "iclass0711"
+            keyAlias "iclass"
+            keyPassword "iclass0711"
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.afollestad.material-dialogs:core:0.9.0.2'
+    testCompile 'junit:junit:4.12'
+    compile files('libs/jackson-all-1.7.5.jar')
+    compile 'com.wang.avi:library:2.1.3'
+
+}
