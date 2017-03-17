@@ -11,14 +11,13 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-
 
     signingConfigs {
         releaseNBLink {
@@ -35,6 +34,31 @@ android {
         }
     }
 
+
+    productFlavors {
+
+        QuDU {
+            resValue 'string', 'app_name', "Qu读"
+        }
+    }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+
+            if (variant.buildType.name.equals('release')) {
+                def fileName = "${variant.productFlavors[0].name}_v${defaultConfig.versionName}_${releaseTime()+"_release"}.apk"
+                output.outputFile = new File(outputFile.parent, fileName)
+            }else{
+                def fileName = "${variant.productFlavors[0].name}_v${defaultConfig.versionName}_${releaseTime()+"_debug"}.apk"
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+
+    }
+}
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
 }
 
 repositories {
