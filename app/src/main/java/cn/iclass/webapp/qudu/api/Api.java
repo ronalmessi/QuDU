@@ -3,10 +3,13 @@ package cn.iclass.webapp.qudu.api;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import cn.iclass.webapp.qudu.util.CipherUtils;
+import cn.iclass.webapp.qudu.util.FileUtil;
 import cn.iclass.webapp.qudu.vo.ImageResult;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -27,6 +30,35 @@ public class Api {
         MultipartBody multipartBody = fileToMultipartBody(file, progressListener);
         Call<ImageResult> call = RetrofitClient.getInstance().getMediaService().uploadImage(multipartBody);
         enqueue(call, requestCallback);
+    }
+
+    /**
+     * 下载文件
+     */
+    public static void downloadFile(final String fileUrl, final File voiceCacheDir, final AbstractRequestCallback<File> requestCallback) {
+        Call<ResponseBody> call = RetrofitClient.getInstance().getMediaService().downloadFile(fileUrl);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (!voiceCacheDir.exists()) {
+                    voiceCacheDir.mkdirs();
+                }
+                File file = new File(voiceCacheDir, CipherUtils.md5(FileUtil.getFilenameFromUrl(fileUrl)));
+                try {
+                    BufferedSink sink = Okio.buffer(Okio.sink(file));
+                    sink.writeAll(response.body().source());
+                    sink.close();
+                    requestCallback.onSuccess(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
     }
 
     private static MultipartBody fileToMultipartBody(File file, ProgressRequestBody.ProgressListener progressListener) {

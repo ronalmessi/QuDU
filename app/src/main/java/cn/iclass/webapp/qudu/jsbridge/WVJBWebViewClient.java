@@ -265,7 +265,7 @@ public class WVJBWebViewClient extends WebViewClient {
                 	if(callback!=null) {
                     	if(value != null && value.startsWith("\"") && value.endsWith("\"")) {
                     		value = value.substring(1,value.length()-1).replaceAll("\\\\", "");
-                    	}  
+                    	}
                     	callback.onReceiveValue(value);
                 	}
                 }

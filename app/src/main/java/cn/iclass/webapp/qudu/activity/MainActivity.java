@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.wang.avi.AVLoadingIndicatorView;
 
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -40,8 +42,11 @@ import cn.iclass.webapp.qudu.jsbridge.WVJBWebViewClient;
 import cn.iclass.webapp.qudu.update.UpdateAgent;
 import cn.iclass.webapp.qudu.update.UpdateInfo;
 import cn.iclass.webapp.qudu.update.UpdateManager;
+import cn.iclass.webapp.qudu.util.AudioPlayUtil;
 import cn.iclass.webapp.qudu.util.SystemUtil;
 import cn.iclass.webapp.qudu.vo.ImageResult;
+import cn.iclass.webapp.qudu.widget.RecordButton;
+import okhttp3.Cache;
 
 import static cn.iclass.webapp.qudu.Constants.REQUEST_CODE_ALBUM;
 import static cn.iclass.webapp.qudu.Constants.REQUEST_CODE_CAMERA;
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String imagePath;
     private AVLoadingIndicatorView avLoadingIndicatorView;
     private BottomSheetLayout bottomSheetLayout;
+    private RecordButton recordButton;
     private WebView webView;
     private Toolbar toolBar;
     private TextView titleTv;
@@ -73,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initWidget() {
         check(true, false, false, false, 998);
+        recordButton = (RecordButton) findViewById(R.id.btn_record);
         avLoadingIndicatorView = (AVLoadingIndicatorView) findViewById(R.id.avi);
         avLoadingIndicatorView.setIndicatorColor(Color.parseColor("#FF4081"));
         avLoadingIndicatorView.setIndicator("BallSpinFadeLoaderIndicator");
@@ -93,11 +100,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         specialUrls.add(Constants.URL.BASE_URL + "readMobile/me".toLowerCase());
         specialUrls.add(Constants.URL.BASE_URL + "readMobile/teach".toLowerCase());
         specialUrls.add(Constants.URL.BASE_URL + "readMobile/toRead".toLowerCase());
-//        specialUrls.add(Constants.BASE_URL + "readMobile/addTask".toLowerCase());
-//        specialUrls.add(Constants.BASE_URL + "readMobile/sendPrivateMsg".toLowerCase());
-
 
         webView = (WebView) findViewById(R.id.webView);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            webView.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
         webView.setWebChromeClient(new WebChromeClient() {
 
             @Override
@@ -126,12 +133,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/teach".toLowerCase(), currentUrl)) {
                     rightTv.setText("创建任务");
                     rightTv.setBackground(null);
-                }
-//                else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/bookLib".toLowerCase(), currentUrl)) {
-//                    rightTv.setText("分类");
-//                    rightTv.setBackground(null);
-//                }
-                else {
+                } else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/bookLib".toLowerCase(), currentUrl)) {
+                    rightTv.setText("分类");
+                    rightTv.setBackground(null);
+                } else {
                     rightTv.setText(null);
                     rightTv.setBackgroundResource(R.mipmap.ic_setting);
                 }
@@ -160,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public UpdateInfo parse(String source) throws Exception {
                 JSONObject jsonObject = new JSONObject(source);
                 String versionCode = jsonObject.getString("versionCode");
-                String androidDownloadUrl = jsonObject.getString("androidDownloadUrl");
+                String downloadUrl = jsonObject.getString("downloadUrl");
                 String updateIntro = jsonObject.getString("updateIntro");
                 String isForceUpdate = jsonObject.getString("isForceUpdate");
 
@@ -171,8 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     info.hasUpdate = false;
                 }
                 info.updateContent = updateIntro;
-                info.url ="http://mobile.ac.qq.com/qqcomic_android.apk";
-//                info.url = androidDownloadUrl;
+                info.url = downloadUrl;
                 info.md5 = "56cf48f10e4cf6043fbf53bbbc4009e2";
                 info.isForce = TextUtils.equals("1", isForceUpdate);
                 info.isIgnorable = isIgnorable;
@@ -304,15 +308,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
 
 
-            registerHandler("shouldnextpage",
-                    new WVJBWebViewClient.WVJBHandler() {
-                        @Override
-                        public void request(Object data,
-                                            WVJBResponseCallback callback) {
-                            myCallback = callback;
-                            myCallback.callback(1);
-                        }
-                    });
+            registerHandler("shouldnextpage", new WVJBWebViewClient.WVJBHandler() {
+                @Override
+                public void request(Object data, WVJBResponseCallback callback) {
+                    myCallback = callback;
+                    myCallback.callback(1);
+                }
+            });
 
             registerHandler("onPicTake", new WVJBWebViewClient.WVJBHandler() {
                 @Override
@@ -335,6 +337,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             });
 
+            registerHandler("onVoiceCreate", new WVJBWebViewClient.WVJBHandler() {
+                @Override
+                public void request(Object data, WVJBResponseCallback callback) {
+                    myCallback = callback;
+                    recordButton.setVisibility(View.VISIBLE);
+                }
+
+            });
+
+            registerHandler("onVoicePreview", new WVJBWebViewClient.WVJBHandler() {
+                @Override
+                public void request(Object data, WVJBResponseCallback callback) {
+                    myCallback = callback;
+                    if (data != null) {
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(data.toString());
+                            String voiceUrl = jsonObject.getString("data");
+                            Api.downloadFile(voiceUrl, new File(Environment.getExternalStorageDirectory() + "/QuDu/voice"), new AbstractRequestCallback<File>() {
+                                @Override
+                                public void onSuccess(File file) {
+                                    String localPath = file.getAbsolutePath();
+                                    if (!TextUtils.isEmpty(localPath)) {
+                                        AudioPlayUtil.getInstance().startPlay(localPath, null, false, null);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(int statusCode, String errorMsg) {
+
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
         }
 
 

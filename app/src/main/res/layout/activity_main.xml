@@ -9,7 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -35,7 +34,18 @@
             android:maxWidth="76dp"
             android:minHeight="76dp"
             android:minWidth="76dp"
-            android:visibility="invisible"/>
+            android:visibility="invisible" />
+
+
+        <cn.iclass.webapp.qudu.widget.RecordButton
+            android:id="@+id/btn_record"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_record"
+            android:visibility="gone" />
 
     </FrameLayout>
 

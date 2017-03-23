@@ -18,4 +18,7 @@ public interface MediaService {
     @POST("form")
     Call<ImageResult> uploadImage(@Body MultipartBody multipartBody);
 
+    @GET
+    Call<ResponseBody> downloadFile(@Url String fileUrl);
+
 }

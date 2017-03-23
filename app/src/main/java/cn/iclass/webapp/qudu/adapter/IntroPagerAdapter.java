@@ -20,7 +20,7 @@ public class IntroPagerAdapter extends PagerAdapter {
 
     private Activity activity;
 
-    private int[] imgResIds = new int[]{R.mipmap.nav1, R.mipmap.nav2, R.mipmap.nav3};
+    private int[] imgResIds = new int[]{R.mipmap.nav1, R.mipmap.nav2, R.mipmap.nav3,R.mipmap.nav4};
 
     public IntroPagerAdapter(Activity activity) {
         this.activity = activity;
@@ -43,7 +43,7 @@ public class IntroPagerAdapter extends PagerAdapter {
         imageView.setScaleType(ImageView.ScaleType.FIT_XY);
         container.addView(imageView);
 
-        if (position == 2) {
+        if (position == imgResIds.length-1) {
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

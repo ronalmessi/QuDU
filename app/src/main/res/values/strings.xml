@@ -1,3 +1,7 @@
 <resources>
     <string name="scan_tips">将二维码图片对准扫描框即可自动扫描</string>
+    <string name="voice_up_tips">手指上滑, 取消发送</string>
+    <string name="voice_cancel_tips">松开手指, 取消发送</string>
+    <string name="voice_seconds_tips">还可以说%1$s秒</string>
+    <string name="voice_short_tips">录音时间太短</string>
 </resources>
