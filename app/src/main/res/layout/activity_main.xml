@@ -36,17 +36,14 @@
             android:minWidth="76dp"
             android:visibility="invisible" />
 
-
         <cn.iclass.webapp.qudu.widget.RecordButton
             android:id="@+id/btn_record"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="10dp"
+            android:layout_margin="16dp"
+            android:layout_gravity="center_horizontal|bottom"
             android:background="@drawable/bg_record"
             android:visibility="gone" />
-
     </FrameLayout>
 
 

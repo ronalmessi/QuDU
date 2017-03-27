@@ -1,6 +1,5 @@
 package cn.iclass.webapp.qudu.util;
 
-import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;

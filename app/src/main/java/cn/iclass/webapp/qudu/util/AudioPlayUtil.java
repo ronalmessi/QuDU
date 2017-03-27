@@ -4,12 +4,12 @@ package cn.iclass.webapp.qudu.util;
  * 作者：Administrator on 2016/8/8 11:09
  * 邮箱：763522252@qq.com
  */
+
 import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-
 
 import java.io.IOException;
 

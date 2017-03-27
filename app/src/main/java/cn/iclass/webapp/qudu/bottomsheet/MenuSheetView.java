@@ -24,7 +24,6 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-
 import java.util.ArrayList;
 
 import cn.iclass.webapp.qudu.R;

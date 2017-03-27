@@ -2,6 +2,7 @@ package cn.iclass.webapp.qudu.api;
 
 
 import cn.iclass.webapp.qudu.vo.ImageResult;
+import cn.iclass.webapp.qudu.vo.VoiceResult;
 import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -20,5 +21,8 @@ public interface MediaService {
 
     @GET
     Call<ResponseBody> downloadFile(@Url String fileUrl);
+
+    @POST("formAudio")
+    Call<VoiceResult> uploadVoice(@Body MultipartBody multipartBody);
 
 }

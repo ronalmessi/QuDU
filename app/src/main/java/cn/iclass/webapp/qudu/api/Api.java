@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 import cn.iclass.webapp.qudu.util.CipherUtils;
 import cn.iclass.webapp.qudu.util.FileUtil;
 import cn.iclass.webapp.qudu.vo.ImageResult;
+import cn.iclass.webapp.qudu.vo.VoiceResult;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -22,6 +23,15 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Api {
+
+    /**
+     * 上传语音文件
+     */
+    public static void uploadVoice(File file, final AbstractRequestCallback<VoiceResult> requestCallback) {
+        MultipartBody body = fileToMultipartBody(file, null);
+        Call<VoiceResult> call = RetrofitClient.getInstance().getMediaService().uploadVoice(body);
+        enqueue(call, requestCallback);
+    }
     
     /**
      * 上传图片文件到图片服务器

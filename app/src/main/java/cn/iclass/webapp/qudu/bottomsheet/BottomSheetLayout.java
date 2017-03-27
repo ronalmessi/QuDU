@@ -24,7 +24,6 @@ import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
-
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import cn.iclass.webapp.qudu.R;

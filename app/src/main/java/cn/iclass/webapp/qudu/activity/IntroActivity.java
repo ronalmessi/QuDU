@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
-import cn.iclass.webapp.qudu.adapter.IntroPagerAdapter;
 import cn.iclass.webapp.qudu.R;
+import cn.iclass.webapp.qudu.adapter.IntroPagerAdapter;
 
 
 public class IntroActivity extends AppCompatActivity {

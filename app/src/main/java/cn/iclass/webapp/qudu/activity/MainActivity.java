@@ -1,7 +1,5 @@
 package cn.iclass.webapp.qudu.activity;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -18,17 +16,17 @@ import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.wang.avi.AVLoadingIndicatorView;
 
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,8 +43,8 @@ import cn.iclass.webapp.qudu.update.UpdateManager;
 import cn.iclass.webapp.qudu.util.AudioPlayUtil;
 import cn.iclass.webapp.qudu.util.SystemUtil;
 import cn.iclass.webapp.qudu.vo.ImageResult;
+import cn.iclass.webapp.qudu.vo.VoiceResult;
 import cn.iclass.webapp.qudu.widget.RecordButton;
-import okhttp3.Cache;
 
 import static cn.iclass.webapp.qudu.Constants.REQUEST_CODE_ALBUM;
 import static cn.iclass.webapp.qudu.Constants.REQUEST_CODE_CAMERA;
@@ -54,7 +52,7 @@ import static cn.iclass.webapp.qudu.Constants.REQUEST_CODE_CAMERA;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, MenuSheetView.OnMenuItemClickListener {
     private final String TAG = "MainActivity";
-
+    private int clickCount = 0;
     private String imagePath;
     private AVLoadingIndicatorView avLoadingIndicatorView;
     private BottomSheetLayout bottomSheetLayout;
@@ -87,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bottomSheetLayout = (BottomSheetLayout) findViewById(R.id.bottomSheetLayout);
         toolBar = (Toolbar) findViewById(R.id.toolbar);
         titleTv = (TextView) toolBar.findViewById(R.id.toolbar_title);
+        titleTv.setOnClickListener(this);
         toolBar.setTitle("");
         leftTv = (TextView) findViewById(R.id.toolbar_left);
         leftTv.setOnClickListener(this);
@@ -94,57 +93,70 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         indexTv.setOnClickListener(this);
         rightTv = (TextView) findViewById(R.id.toolbar_right);
         rightTv.setOnClickListener(this);
-        specialUrls.add(Constants.URL.BASE_URL + "readMobile/bookLib".toLowerCase());
-        specialUrls.add(Constants.URL.BASE_URL + "readMobile/messages/teacher".toLowerCase());
-        specialUrls.add(Constants.URL.BASE_URL + "readMobile/messages/student".toLowerCase());
-        specialUrls.add(Constants.URL.BASE_URL + "readMobile/me".toLowerCase());
-        specialUrls.add(Constants.URL.BASE_URL + "readMobile/teach".toLowerCase());
-        specialUrls.add(Constants.URL.BASE_URL + "readMobile/toRead".toLowerCase());
+
+        recordButton.setOnFinishedRecordListener(new RecordButton.OnFinishedRecordListener() {
+            @Override
+            public void onFinishedRecord(String audioPath, long recordTime) {
+                recordButton.setVisibility(View.GONE);
+                String time = (new BigDecimal(recordTime / 1000.0).setScale(0, RoundingMode.HALF_UP)) + "";
+                uploadAmr(audioPath, time);
+            }
+        });
 
         webView = (WebView) findViewById(R.id.webView);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             webView.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
         webView.setWebChromeClient(new WebChromeClient() {
+                                       @Override
+                                       public void onReceivedTitle(WebView view, String title) {
+                                           super.onReceivedTitle(view, title);
+                                           currentUrl = view.getUrl().toLowerCase();
+                                           titleTv.setText(title);
+                                           if (!TextUtils.equals(Constants.URL.BASE_URL.toLowerCase(), currentUrl) && !specialUrls.contains(currentUrl)) {
+                                               indexTv.setVisibility(View.VISIBLE);
+                                           } else {
+                                               indexTv.setVisibility(View.GONE);
+                                           }
 
-            @Override
-            public void onReceivedTitle(WebView view, String title) {
-                super.onReceivedTitle(view, title);
-                currentUrl = view.getUrl().toLowerCase();
-                titleTv.setText(title);
+                                           if (specialUrls.contains(currentUrl)) {
+                                               leftTv.setBackground(null);
+                                               leftTv.setText("刷新");
+                                           } else {
+                                               leftTv.setBackgroundResource(R.mipmap.ic_back);
+                                               leftTv.setText(null);
+                                           }
 
-                if (!TextUtils.equals(Constants.URL.BASE_URL.toLowerCase(), currentUrl) && !specialUrls.contains(currentUrl)) {
-                    indexTv.setVisibility(View.VISIBLE);
-                } else {
-                    indexTv.setVisibility(View.GONE);
-                }
-
-                if (specialUrls.contains(currentUrl)) {
-                    leftTv.setBackground(null);
-                    leftTv.setText("刷新");
-                } else {
-                    leftTv.setBackgroundResource(R.mipmap.ic_back);
-                    leftTv.setText(null);
-                }
-
-                if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/messages/teacher".toLowerCase(), currentUrl)) {
-                    rightTv.setText("发送私信");
-                    rightTv.setBackground(null);
-                } else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/teach".toLowerCase(), currentUrl)) {
-                    rightTv.setText("创建任务");
-                    rightTv.setBackground(null);
-                } else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/bookLib".toLowerCase(), currentUrl)) {
-                    rightTv.setText("分类");
-                    rightTv.setBackground(null);
-                } else {
-                    rightTv.setText(null);
-                    rightTv.setBackgroundResource(R.mipmap.ic_setting);
-                }
-            }
-        });
+                                           if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/messages/teacher".toLowerCase(), currentUrl)) {
+                                               rightTv.setText("发送私信");
+                                               rightTv.setBackground(null);
+                                           } else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/teach".toLowerCase(), currentUrl)) {
+                                               rightTv.setText("创建任务");
+                                               rightTv.setBackground(null);
+                                           } else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/bookLib".toLowerCase(), currentUrl)) {
+                                               rightTv.setText("分类");
+                                               rightTv.setBackground(null);
+                                           } else {
+                                               rightTv.setText(null);
+                                               rightTv.setBackgroundResource(R.mipmap.ic_setting);
+                                           }
+                                       }
+                                   }
+        );
         webView.setWebViewClient(new CustomWebViewClient(webView));
-        webView.loadUrl(Constants.URL.BASE_URL);
 
+        initSpecialUrls();
+        webView.loadUrl(Constants.URL.BASE_URL);
+    }
+
+    private void initSpecialUrls() {
+        specialUrls.clear();
+        specialUrls.add(Constants.URL.BASE_URL + "readMobile/bookLib".toLowerCase());
+        specialUrls.add(Constants.URL.BASE_URL + "readMobile/messages/teacher".toLowerCase());
+        specialUrls.add(Constants.URL.BASE_URL + "readMobile/messages/student".toLowerCase());
+        specialUrls.add(Constants.URL.BASE_URL + "readMobile/me".toLowerCase());
+        specialUrls.add(Constants.URL.BASE_URL + "readMobile/teach".toLowerCase());
+        specialUrls.add(Constants.URL.BASE_URL + "readMobile/toRead".toLowerCase());
     }
 
     @Override
@@ -221,6 +233,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     onBackPressed();
                 }
                 break;
+
+            case R.id.toolbar_title:
+                clickCount++;
+                if (clickCount > 9) {
+                    Constants.URL.BASE_URL = "https://qudumobiletest.joy-read.com/";
+                    initSpecialUrls();
+                    webView.clearHistory();
+                    webView.loadUrl(Constants.URL.BASE_URL);
+                }
+                break;
         }
     }
 
@@ -257,6 +279,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    private void uploadAmr(String path, final String recordTime) {
+        final MaterialDialog dialog = new MaterialDialog.Builder(this)
+                .content("正在上传语音。。。").canceledOnTouchOutside(false)
+                .progress(true, 0)
+                .progressIndeterminateStyle(false).build();
+        dialog.show();
+        Api.uploadVoice(new File(path), new AbstractRequestCallback<VoiceResult>() {
+            @Override
+            public void onSuccess(VoiceResult voiceResult) {
+                if (!TextUtils.isEmpty(voiceResult.html))
+                    myCallback.callback(recordTime + "|" + voiceResult.html);
+                dialog.dismiss();
+            }
+
+            @Override
+            public void onFailure(int statusCode, String errorMsg) {
+                SystemUtil.showToast(MainActivity.this, "上传失败，请检查网络!");
+                dialog.dismiss();
+            }
+        });
+    }
+
+
     private void uploadImage(String path) {
         final MaterialDialog dialog = new MaterialDialog.Builder(this)
                 .content("正在上传图片,请稍候。。。").canceledOnTouchOutside(false)
@@ -278,20 +323,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Constants.URL.BASE_URL = "https://qudumobile.joy-read.com/";
+    }
 
     class CustomWebViewClient extends WVJBWebViewClient {
-
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            return super.shouldOverrideUrlLoading(view, url);
-        }
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             avLoadingIndicatorView.setVisibility(View.VISIBLE);
             super.onPageStarted(view, url, favicon);
         }
-
 
         @Override
         public void onPageFinished(WebView view, String url) {
@@ -377,6 +421,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
         }
 
-
     }
+
 }
