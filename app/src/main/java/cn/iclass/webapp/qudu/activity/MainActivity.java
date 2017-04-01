@@ -6,12 +6,14 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -65,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView rightTv;
     private String currentUrl;
     private List<String> specialUrls = new ArrayList<>();
-
     private WVJBWebViewClient.WVJBResponseCallback myCallback;
 
     @Override
@@ -288,8 +289,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Api.uploadVoice(new File(path), new AbstractRequestCallback<VoiceResult>() {
             @Override
             public void onSuccess(VoiceResult voiceResult) {
-                if (!TextUtils.isEmpty(voiceResult.html))
+                if (!TextUtils.isEmpty(voiceResult.html)) {
                     myCallback.callback(recordTime + "|" + voiceResult.html);
+                }
                 dialog.dismiss();
             }
 
@@ -350,7 +352,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 }
             });
-
 
             registerHandler("shouldnextpage", new WVJBWebViewClient.WVJBHandler() {
                 @Override
@@ -416,6 +417,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                    }
+                }
+            });
+
+            registerHandler("onVoiceInit", new WVJBWebViewClient.WVJBHandler() {
+                @Override
+                public void request(Object data, WVJBResponseCallback callback) {
+                    myCallback = callback;
+                    int maxRecordTime = 60;
+                    if (data != null) {
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(data.toString());
+                            maxRecordTime = jsonObject.getInt("data");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (recordButton.getVisibility() == View.GONE) {
+                        recordButton.setVisibility(View.INVISIBLE);
+                        recordButton.setShowDialog(false);
+                        recordButton.setMaxIntervalTime(maxRecordTime * 1000);
+                        recordButton.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                recordButton.dispatchTouchEvent(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN, recordButton.getLeft() + 5, recordButton.getTop() + 5, 0));
+                            }
+                        }, 250);
+                    } else if (recordButton.getVisibility() == View.INVISIBLE) {
+                        recordButton.dispatchTouchEvent(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, recordButton.getLeft() + 5, recordButton.getTop() + 5, 0));
+                        recordButton.setVisibility(View.GONE);
                     }
                 }
             });

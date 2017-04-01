@@ -36,7 +36,7 @@ public class RecordButton extends Button {
 
     private static final int MIN_INTERVAL_LONGPRESS_TIME = 500; // 长按超过500毫秒开始录音
     private static final int MIN_INTERVAL_TIME = 1000; // 录音最短时间
-    private static final int MAX_INTERVAL_TIME = 60000; // 录音最长时间
+    private static int MAX_INTERVAL_TIME = 60000; // 录音最长时间
 
     private Dialog mRecordDialog;
     private long touchStartTime;// 触摸开始时间
@@ -56,6 +56,8 @@ public class RecordButton extends Button {
     private Context context;
 
     private AudioRecorder audioRecorder;
+
+    private boolean showDialog = true;
 
     private boolean isOverSwipeUp = false;
     private boolean inRemainedTime = false;
@@ -87,6 +89,24 @@ public class RecordButton extends Button {
         int[] voiceAnimRes = new int[]{R.drawable.chat_icon_voice1, R.drawable.chat_icon_voice2, R.drawable.chat_icon_voice3, R.drawable.chat_icon_voice4, R.drawable.chat_icon_voice5, R.drawable.chat_icon_voice6};
         return voiceAnimRes;
     }
+
+    public boolean isShowDialog() {
+        return showDialog;
+    }
+
+    public void setShowDialog(boolean showDialog) {
+        this.showDialog = showDialog;
+    }
+
+    public void setMaxIntervalTime(int maxIntervalTime) {
+        MAX_INTERVAL_TIME = maxIntervalTime;
+    }
+
+    public boolean isRecording() {
+        if (audioRecorder == null) return false;
+        return audioRecorder.isRecording();
+    }
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -154,16 +174,19 @@ public class RecordButton extends Button {
                 if (intervalTime > 0 && intervalTime < MIN_INTERVAL_LONGPRESS_TIME) {
                     return;
                 }
-                if (mRecordDialog == null) {
-                    mRecordDialog = new Dialog(getContext(), R.style.CustomDialog);
-                    mRecordDialog.setCanceledOnTouchOutside(false);
-                    mRecordDialog.setContentView(R.layout.dialog_record);
-                    iv_record_amplitude = (ImageView) mRecordDialog.findViewById(R.id.iv_record_amplitude);
-                    tv_record_tips = (TextView) mRecordDialog.findViewById(R.id.tv_record_tips);
+
+                if (isShowDialog()) {
+                    if (mRecordDialog == null) {
+                        mRecordDialog = new Dialog(getContext(), R.style.CustomDialog);
+                        mRecordDialog.setCanceledOnTouchOutside(false);
+                        mRecordDialog.setContentView(R.layout.dialog_record);
+                        iv_record_amplitude = (ImageView) mRecordDialog.findViewById(R.id.iv_record_amplitude);
+                        tv_record_tips = (TextView) mRecordDialog.findViewById(R.id.tv_record_tips);
+                    }
+                    tv_record_tips.setText(R.string.voice_up_tips);
+                    tv_record_tips.setBackgroundResource(R.color.black);
+                    mRecordDialog.show();
                 }
-                tv_record_tips.setText(R.string.voice_up_tips);
-                tv_record_tips.setBackgroundResource(R.color.black);
-                mRecordDialog.show();
                 startRecording();
             }
         });
@@ -175,7 +198,9 @@ public class RecordButton extends Button {
      * 录音完成（达到最长时间或用户决定录音完成）
      */
     private void finishRecord() {
-        mRecordDialog.dismiss();
+        if (isShowDialog() && mRecordDialog != null) {
+            mRecordDialog.dismiss();
+        }
         stopRecording();
         long intervalTime = System.currentTimeMillis() - touchStartTime;
         if (intervalTime < MIN_INTERVAL_TIME || (recordEndTime - recordStartTime) < MIN_INTERVAL_TIME) {
@@ -209,7 +234,9 @@ public class RecordButton extends Button {
     // 用户手动取消录音
     private void cancelRecord() {
         stopRecording();
-        mRecordDialog.dismiss();
+        if (isShowDialog() && mRecordDialog != null) {
+            mRecordDialog.dismiss();
+        }
     }
 
     private String getCurrentDate() {
@@ -231,7 +258,9 @@ public class RecordButton extends Button {
                 super.handleMessage(msg);
                 if (msg.what == AudioRecorder.ERROR_TYPE) {
                     Toast.makeText(context, "没有麦克风权限", Toast.LENGTH_SHORT).show();
-                    mRecordDialog.dismiss();
+                    if (isShowDialog() && mRecordDialog != null) {
+                        mRecordDialog.dismiss();
+                    }
                     if (audioRecorder != null && audioRecorder.isRecording()) {
                         audioRecorder.stop();
                     }
@@ -243,7 +272,9 @@ public class RecordButton extends Button {
             recordStartTime = System.currentTimeMillis();
             ShowVolumeHandler.postDelayed(recordThread, 150);
         } catch (IOException e) {
-            mRecordDialog.dismiss();
+            if (isShowDialog() && mRecordDialog != null) {
+                mRecordDialog.dismiss();
+            }
             e.printStackTrace();
         }
 
@@ -269,7 +300,9 @@ public class RecordButton extends Button {
                     inRemainedTime = true;
                     int remainedSeconds = (int) ((MAX_INTERVAL_TIME - intervalTime) / 1000);
                     String remainedSecondsTip = getResources().getString(R.string.voice_seconds_tips);
-                    tv_record_tips.setText(String.format(remainedSecondsTip, remainedSeconds + 1));
+                    if (isShowDialog()) {
+                        tv_record_tips.setText(String.format(remainedSecondsTip, remainedSeconds + 1));
+                    }
                 }
                 if (audioRecorder != null && !isOverSwipeUp) {
                     int amplitudeLevel = audioRecorder.getAmplitudeLevel();
@@ -285,7 +318,7 @@ public class RecordButton extends Button {
     private Handler ShowVolumeHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what != -1) {
+            if (msg.what != -1 && isShowDialog()) {
                 iv_record_amplitude.setImageResource(voiceAnimRes[msg.what]);
             }
         }

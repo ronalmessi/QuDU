@@ -123,8 +123,8 @@ public class WVJBWebViewClient extends WebViewClient {
         		.replaceAll("\'", "\\\\\'")
         		.replaceAll("\n", "\\\\\n")
         		.replaceAll("\r", "\\\\\r")
-        		.replaceAll("\f","\\\\\f");  
-        
+        		.replaceAll("\f","\\\\\f");
+
         log("SEND",messageJSON);
 
         if(Looper.myLooper() == Looper.getMainLooper()) {
