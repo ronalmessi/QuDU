@@ -121,22 +121,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                            }
 
                                            if (specialUrls.contains(currentUrl)) {
-                                               leftTv.setBackground(null);
-                                               leftTv.setText("刷新");
+                                               leftTv.setText(null);
+                                               leftTv.setBackgroundResource(R.mipmap.ic_refresh);
                                            } else {
                                                leftTv.setBackgroundResource(R.mipmap.ic_back);
                                                leftTv.setText(null);
                                            }
 
-                                           if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/messages/teacher".toLowerCase(), currentUrl)) {
+                                           if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/messages/teacher".toLowerCase(), currentUrl)||TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/messagepage/teacher".toLowerCase(), currentUrl)) {
                                                rightTv.setText("发送私信");
                                                rightTv.setBackground(null);
                                            } else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/teach".toLowerCase(), currentUrl)) {
                                                rightTv.setText("创建任务");
                                                rightTv.setBackground(null);
                                            } else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/bookLib".toLowerCase(), currentUrl)) {
-                                               rightTv.setText("分类");
-                                               rightTv.setBackground(null);
+                                               rightTv.setBackgroundResource(R.mipmap.ic_cate);
+                                               rightTv.setText(null);
                                            } else {
                                                rightTv.setText(null);
                                                rightTv.setBackgroundResource(R.mipmap.ic_setting);
@@ -155,6 +155,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         specialUrls.add(Constants.URL.BASE_URL + "readMobile/bookLib".toLowerCase());
         specialUrls.add(Constants.URL.BASE_URL + "readMobile/messages/teacher".toLowerCase());
         specialUrls.add(Constants.URL.BASE_URL + "readMobile/messages/student".toLowerCase());
+        specialUrls.add(Constants.URL.BASE_URL + "readMobile/messagepage/teacher".toLowerCase());
+        specialUrls.add(Constants.URL.BASE_URL + "readMobile/messagepage/student".toLowerCase());
         specialUrls.add(Constants.URL.BASE_URL + "readMobile/me".toLowerCase());
         specialUrls.add(Constants.URL.BASE_URL + "readMobile/teach".toLowerCase());
         specialUrls.add(Constants.URL.BASE_URL + "readMobile/toRead".toLowerCase());
@@ -213,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.toolbar_right:
-                if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/messages/teacher".toLowerCase(), currentUrl)) {
+                if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/messages/teacher".toLowerCase(), currentUrl)||TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/messagepage/teacher".toLowerCase(), currentUrl)) {
                     webView.loadUrl(Constants.URL.BASE_URL + "readMobile/sendPrivateMsg");
                 } else if (TextUtils.equals(Constants.URL.BASE_URL.toLowerCase() + "readMobile/teach".toLowerCase(), currentUrl)) {
                     webView.loadUrl(Constants.URL.BASE_URL + "readMobile/addTask");

@@ -239,19 +239,23 @@ public class RecordButton extends Button {
         }
     }
 
-    private String getCurrentDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HHmmss");
-        Date curDate = new Date(System.currentTimeMillis());// 获取当前时间
-        String str = formatter.format(curDate);
-        return str;
+    public File getAppSubDir(String dir) {
+        File appSubDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/QuDu" + dir);
+        if (!appSubDir.exists()) {
+            appSubDir.mkdirs();
+        }
+        return appSubDir;
     }
 
     private void startRecording() {
         if (audioRecorder != null && audioRecorder.isRecording()) {
             audioRecorder.stop();
         }
-        String filePath = new File(Environment.getExternalStorageDirectory() + "/QuDu/voice") + "/" + getCurrentDate() + ".pcm";
-        audioRecorder = new AudioRecorder(new File(filePath));
+
+        File imageExportDir = getAppSubDir("/voice");
+        String fileName = System.currentTimeMillis() + ".pcm";
+        File voiceFile = new File(imageExportDir, fileName);
+        audioRecorder = new AudioRecorder(voiceFile);
         audioRecorder.setErrorHandler(new Handler() {
             @Override
             public void handleMessage(Message msg) {
